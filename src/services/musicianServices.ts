@@ -49,9 +49,15 @@ async function query(musicianQuery: MusicianQuery): Promise<Musician[]> {
   return musicians;
 }
 
+async function getInvites(userID: Number) {
+  const invites = await musicianRepositories.getPendingInvitations(userID);
+  return invites;
+}
+
 export default {
   signup,
   signin,
   getById,
   query,
+  getInvites,
 };

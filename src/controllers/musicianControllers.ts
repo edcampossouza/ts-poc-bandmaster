@@ -50,9 +50,21 @@ async function query(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function getInvites(req: Request, res: Response, next: NextFunction) {
+  try {
+    const userID: Number = res.locals.user.id;
+    const results = await musicianServices.getInvites(userID);
+    return res.status(200).send(results);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}
+
 export default {
   signup,
   signin,
   getById,
   query,
+  getInvites,
 };

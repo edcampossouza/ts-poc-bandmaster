@@ -18,10 +18,17 @@ musicianRouter.post(
   validateBody(SigninSchema),
   musicianControllers.signin
 );
+
 musicianRouter.get(
   "/query",
   authMiddleware,
   musicianControllers.query
+);
+
+musicianRouter.get(
+  "/invites",
+  authMiddleware,
+  musicianControllers.getInvites
 );
 
 
@@ -30,5 +37,6 @@ musicianRouter.get(
   authMiddleware,
   musicianControllers.getById
 );
+
 
 export default musicianRouter;
