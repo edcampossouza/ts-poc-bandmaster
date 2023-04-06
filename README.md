@@ -88,12 +88,12 @@ The authenticated musician becomes the founder of the band
 ## Query bands
 ### this is an authenticated route
 ```
-POST /bands/query
+GET /bands/query
 ```
 sample query 
 
 ```
-POST /bands/query?city=angeles&style=metal
+GET /bands/query?city=angeles&style=metal
 ```
 
 sample output
