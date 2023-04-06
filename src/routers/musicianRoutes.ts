@@ -32,6 +32,13 @@ musicianRouter.get(
 );
 
 
+musicianRouter.post(
+  "/invites/:bandId/accept/",
+  authMiddleware,
+  musicianControllers.acceptInvitation
+);
+
+
 musicianRouter.get(
   "/:id",
   authMiddleware,

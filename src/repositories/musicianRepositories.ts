@@ -92,12 +92,24 @@ async function getMusiciansFromQuery(
   return results;
 }
 
+async function acceptInvitation({ userID, bandId }) {
+  await connectionDb.query(
+    `
+      UPDATE musician_band
+      SET accepted_at = now()
+      WHERE (musician_band.musician_id = $1 AND musician_band.band_id = $2)
+    `,
+    [userID, bandId]
+  );
+}
+
 export default {
   signup,
   findByEmail,
   getById,
   getMusiciansFromQuery,
   getPendingInvitations,
+  acceptInvitation,
 };
 
 function buildMusicianQuery(query: MusicianQuery): WhereClause {

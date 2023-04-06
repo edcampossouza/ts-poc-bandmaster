@@ -54,10 +54,22 @@ async function getInvites(userID: Number) {
   return invites;
 }
 
+async function acceptInvitation({ userID, bandId }) {
+  const invites = await getInvites(userID);
+  if (!invites.find((i) => i.id === bandId))
+    throw errors.conflictError(`You have not been invited to this band!`);
+
+  await musicianRepositories.acceptInvitation({
+    userID,
+    bandId,
+  });
+}
+
 export default {
   signup,
   signin,
   getById,
   query,
   getInvites,
+  acceptInvitation,
 };

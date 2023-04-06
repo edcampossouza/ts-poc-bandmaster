@@ -61,10 +61,30 @@ async function getInvites(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function acceptInvitation(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { bandId } = req.params;
+    const userID: Number = res.locals.user.id;
+    await musicianServices.acceptInvitation({
+      userID,
+      bandId: Number(bandId),
+    });
+    return res.sendStatus(201);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}
+
 export default {
   signup,
   signin,
   getById,
   query,
   getInvites,
+  acceptInvitation,
 };
