@@ -172,3 +172,73 @@ sample output
 ]
 
 ```
+
+
+
+## Invite a musician to a band
+### this is an authenticated route
+```
+POST /bands/:bandId/invite/:musicianId
+```
+sample input
+```
+POST /bands/6/invite/12
+```
+sample output
+```
+201 Created
+```
+sample output when the invited musician is already in the band
+```
+{
+    "message": "James Hetfield is already in Metallica"
+}
+```
+sample output when the invited musician has already been invited to the band (but has not yet accepted the invitation)
+```
+{
+    "message": "Anthony Kiedis has already been invited to Metallica at Thu Apr 06 2023 22:48:57 GMT-0300 (Brasilia Standard Time)"
+}
+```
+
+## Accept an invitation
+### this is an authenticated route
+
+```
+POST /musicians/invites/:bandId/accept/
+```
+
+sample input
+```
+POST /musicians/invites/6/accept/
+
+```
+sample output
+```
+201 Created
+```
+
+sample output (when user has not been invited to the band)
+```
+{
+    "message": "You have not been invited to this band!"
+}
+```
+## Get pending invitations
+### this is an authenticated route
+
+
+GET /musicians/invites
+
+returns all invitations the musician has received and has not yet accepted
+
+sample output
+```
+[
+    {
+        "id": 6,
+        "name": "Metallica",
+        "invited_at": "2023-04-07T01:48:57.295Z"
+    }
+]
+```
