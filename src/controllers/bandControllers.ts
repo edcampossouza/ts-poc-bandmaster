@@ -33,7 +33,7 @@ async function invite(req: Request, res: Response, next: NextFunction) {
     const userID: Number = res.locals.user.id;
     await bandServices.invite({ userID, bandId: Number(bandId), musicianId: Number(musicianId) });
 
-    return res.status(200).send("..");
+    return res.sendStatus(201);
   } catch (error) {
     console.log(error);
     next(error);
