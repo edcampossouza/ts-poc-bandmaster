@@ -7,3 +7,8 @@ export type Musician = {
   skills: string[];
 };
 export type MusicianInput = Omit<Musician, "id">;
+
+export type MusicianCredentials = Omit<
+  Musician,
+  "id" | "name" | "dateOfBirth" | "skills"
+>;

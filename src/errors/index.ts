@@ -1,4 +1,4 @@
-function invalidCredentialsError(message: string): Error {
+function invalidCredentialsError(message?: string): Error {
   return {
     name: "InvalidCredentialsError",
     message: message || "Email or password are incorrect",

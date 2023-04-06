@@ -1,9 +1,18 @@
-import { MusicianInput } from "../protocols/Musician";
+import {
+  Musician,
+  MusicianCredentials,
+  MusicianInput,
+} from "../protocols/Musician";
 
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
 import musicianRepositories from "../repositories/musicianRepositories.js";
 import errors from "../errors/index.js";
+
+dotenv.config();
+const { JWT_SECRET } = process.env;
 
 async function signup(musician: MusicianInput) {
   const exists = await musicianRepositories.findByEmail(musician.email);
@@ -14,6 +23,26 @@ async function signup(musician: MusicianInput) {
   await musicianRepositories.signup(musician);
 }
 
+async function signin(musician: MusicianCredentials) {
+  const exists = await musicianRepositories.findByEmail(musician.email);
+  if (!exists) throw errors.invalidCredentialsError();
+  const hashedPassword = exists.password;
+  console.log(exists);
+  const valid = bcrypt.compareSync(musician.password, hashedPassword);
+  if (!valid) throw errors.invalidCredentialsError();
+  delete exists.password;
+  const token = jwt.sign(exists, JWT_SECRET);
+  return { token };
+}
+
+async function getById(id: number): Promise<Musician | null> {
+  const musician = await musicianRepositories.getById(id);
+  if (musician) delete musician.password;
+  return musician;
+}
+
 export default {
   signup,
+  signin,
+  getById,
 };

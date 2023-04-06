@@ -9,3 +9,8 @@ export const MusicianInputSchema = Joi.object({
   email: Joi.string().email().required(),
   skills: Joi.array().items(Joi.string()).min(1).required(),
 });
+
+export const SigninSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).required(),
+});
