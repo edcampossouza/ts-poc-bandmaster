@@ -8,7 +8,7 @@ create table musician (
 
 create table band(
     id serial primary key,
-    name text not null,
+    name text not null unique,
     founder_id integer not null references musician(id),
     date_of_foundation date not null,
     city text not null,

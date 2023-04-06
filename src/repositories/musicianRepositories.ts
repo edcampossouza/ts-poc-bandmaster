@@ -26,6 +26,7 @@ async function signup(musician: MusicianInput) {
 async function findByEmail(email: string): Promise<Musician | null> {
   const result = await connectionDb.query(
     ` SELECT  json_build_object(
+        'id', musician.id,
         'name', name, 
         'email', email, 
         'date_of_birth', date_of_birth,
@@ -36,8 +37,7 @@ async function findByEmail(email: string): Promise<Musician | null> {
           FROM musician
           LEFT JOIN musician_skill ON musician_skill.musician_id = musician.id
           WHERE email = $1
-          GROUP BY name, email, date_of_birth, password
-
+          GROUP BY name, email, date_of_birth, password, musician.id
     `,
     [email]
   );
