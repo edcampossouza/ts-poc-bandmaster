@@ -1,44 +1,13 @@
 import { Band, BandInput } from "../protocols/Band.js";
 import connectionDb from "../config/database.js";
 import { Musician } from "../protocols/Musician.js";
+import { BandQuery } from "../protocols/Queries.js";
+import { QueryCondition, WhereClause, buildWhereClause } from "./util.js";
 
 async function getByName(name: string, { exact = false }): Promise<Band[]> {
-  const key = exact ? name : `%${name}%`;
-  const bands: Band[] = (
-    await connectionDb.query(
-      `
-        SELECT json_build_object (
-            'id', band.id,
-            'founder', json_build_object(
-                'id', founder.id,
-                'name', founder.name,
-                'dateOfBirth', founder.date_of_birth,
-                'email', founder.email,
-                'skills', (
-                    (select array_agg(musician_skill.skill)
-                    from musician_skill
-                    where musician_skill.musician_id = founder.id)
-                )
-            ),
-            'name', band.name,
-            'dateOfFoundation', band.date_of_foundation,
-            'city', band.city,
-            'style', band.style
-         
-        )
-        FROM band
-        JOIN musician as founder on founder.id = band.founder_id
-        WHERE band.name like $1
-        GROUP BY band.id, founder.id, band.name
-        
-    `,
-      [key]
-    )
-  ).rows.map((r) => r.json_build_object);
-  for (const band of bands) {
-    band.members = await bandMembers(band.id);
-  }
-  return bands;
+  const bandQuery: BandQuery = exact ? { nameExact: name } : { name: name };
+  const result = await getBandsFromQuery(bandQuery);
+  return result;
 }
 
 async function create(bandInput: BandInput, founder_id: Number): Promise<void> {
@@ -66,7 +35,7 @@ async function create(bandInput: BandInput, founder_id: Number): Promise<void> {
   );
 }
 
-async function bandMembers(bandId: number): Promise<Musician[]> {
+async function bandMembers(bandId: number) {
   const results = await connectionDb.query(
     `
             SELECT  json_build_object(
@@ -84,10 +53,96 @@ async function bandMembers(bandId: number): Promise<Musician[]> {
         `,
     [bandId]
   );
-  return results.rows;
+  return results.rows.map((x) => x.json_build_object);
+}
+
+function buildBandQuery(query: BandQuery): WhereClause {
+  const conditions: QueryCondition[] = [];
+  if (query.id) {
+    conditions.push({
+      column: "band.id",
+      operator: "=",
+      variable: query.id,
+    });
+  }
+  if (query.name) {
+    conditions.push({
+      column: "lower(band.name)",
+      operator: "LIKE",
+      variable: `%${query.name.toLowerCase()}%`,
+    });
+  }
+  if (query.nameExact) {
+    conditions.push({
+      column: "band.name",
+      operator: "LIKE",
+      variable: query.nameExact,
+    });
+  }
+  if (query.style) {
+    conditions.push({
+      column: "lower(band.style)",
+      operator: "LIKE",
+      variable: `%${query.style.toLowerCase()}%`,
+    });
+  }
+  if (query.city) {
+    conditions.push({
+      column: "lower(band.city)",
+      operator: "LIKE",
+      variable: `%${query.city.toLowerCase()}%`,
+    });
+  }
+  return buildWhereClause(conditions);
+}
+
+async function executeBandQuery(clause: WhereClause): Promise<Band[]> {
+  const bands = (
+    await connectionDb.query(
+      `
+          SELECT json_build_object (
+            'id', band.id,
+            'founder', json_build_object(
+                'id', founder.id,
+                'name', founder.name,
+                'dateOfBirth', founder.date_of_birth,
+                'email', founder.email,
+                'skills', (
+                    (select array_agg(musician_skill.skill)
+                    from musician_skill
+                    where musician_skill.musician_id = founder.id)
+                )
+            ),
+            'name', band.name,
+            'dateOfFoundation', band.date_of_foundation,
+            'city', band.city,
+            'style', band.style
+        
+        )
+        FROM band
+        JOIN musician as founder on founder.id = band.founder_id
+        ${clause.clause}
+        GROUP BY band.id, founder.id, band.name
+    
+  `,
+      clause.varArray
+    )
+  ).rows.map((r) => r.json_build_object);
+  for (const band of bands) {
+    band.members = await bandMembers(band.id);
+  }
+  return bands;
+}
+
+async function getBandsFromQuery(query: BandQuery): Promise<Band[]> {
+  const clause: WhereClause = buildBandQuery(query);
+  console.log(clause);
+  const results = await executeBandQuery(clause);
+  return results;
 }
 
 export default {
   getByName,
   create,
+  getBandsFromQuery,
 };

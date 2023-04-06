@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { BandInput } from "../protocols/Band";
 import bandServices from "../services/bandServices.js";
+import { BandQuery } from "../protocols/Queries";
 
 async function createBand(req: Request, res: Response, next: NextFunction) {
   try {
@@ -15,6 +16,18 @@ async function createBand(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function searchBands(req: Request, res: Response, next: NextFunction) {
+  try {
+    const queryParams = req.query as BandQuery;
+    const results = await bandServices.query(queryParams);
+    return res.status(200).send(results);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}
+
 export default {
   createBand,
+  searchBands,
 };
