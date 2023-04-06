@@ -3,6 +3,7 @@ import { Musician, MusicianInput } from "../protocols/Musician";
 import connectionDb from "../config/database.js";
 import { MusicianQuery } from "../protocols/Queries";
 import { QueryCondition, WhereClause, buildWhereClause } from "./util.js";
+import { Band } from "../protocols/Band";
 
 async function signup(musician: MusicianInput) {
   const mus = await connectionDb.query(
@@ -50,6 +51,7 @@ async function findByEmail(email: string): Promise<Musician | null> {
 async function getById(id: Number): Promise<Musician | null> {
   const result = await connectionDb.query(
     ` SELECT  json_build_object(
+        'id', musician.id,
         'name', name, 
         'email', email, 
         'date_of_birth', date_of_birth,
@@ -60,13 +62,26 @@ async function getById(id: Number): Promise<Musician | null> {
           FROM musician
           LEFT JOIN musician_skill ON musician_skill.musician_id = musician.id
           WHERE musician.id = $1
-          GROUP BY name, email, date_of_birth, password
+          GROUP BY name, email, date_of_birth, password, musician.id
 
     `,
     [id]
   );
   if (result.rowCount === 0) return null;
   return result.rows[0].json_build_object;
+}
+
+async function getPendingInvitations(musicianId: Number) {
+  const results = await connectionDb.query(
+    `
+      SELECT band.id, band.name, invited_at
+      FROM musician_band JOIN band on band.id = musician_band.band_id
+      WHERE musician_band.musician_id = $1 
+      AND musician_band.accepted_at IS NULL    
+    `,
+    [musicianId]
+  );
+  return results.rows;
 }
 
 async function getMusiciansFromQuery(
@@ -82,6 +97,7 @@ export default {
   findByEmail,
   getById,
   getMusiciansFromQuery,
+  getPendingInvitations,
 };
 
 function buildMusicianQuery(query: MusicianQuery): WhereClause {

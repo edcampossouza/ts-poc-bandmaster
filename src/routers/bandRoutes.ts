@@ -15,4 +15,10 @@ bandRouter.post(
 
 bandRouter.get("/query", authMiddleware, bandControllers.searchBands);
 
+bandRouter.post(
+  "/:bandId/invite/:musicianId",
+  authMiddleware,
+  bandControllers.invite
+);
+
 export default bandRouter;

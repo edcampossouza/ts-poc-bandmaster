@@ -39,6 +39,7 @@ async function bandMembers(bandId: number) {
   const results = await connectionDb.query(
     `
             SELECT  json_build_object(
+                'id', musician.id,
                 'name', name, 
                 'email', email, 
                 'date_of_birth', date_of_birth,
@@ -48,8 +49,8 @@ async function bandMembers(bandId: number) {
                 FROM musician
                 JOIN musician_band on musician_band.musician_id = musician.id
                 LEFT JOIN musician_skill ON musician_skill.musician_id = musician.id
-                WHERE musician_band.band_id = $1
-                GROUP BY name, email, date_of_birth
+                WHERE musician_band.band_id = $1 AND accepted_at IS NOT NULL
+                GROUP BY name, email, date_of_birth, musician.id
         `,
     [bandId]
   );
@@ -140,8 +141,19 @@ async function getBandsFromQuery(query: BandQuery): Promise<Band[]> {
   return results;
 }
 
+async function invite({ bandId, musicianId }): Promise<void> {
+  await connectionDb.query(
+    `
+      INSERT INTO musician_band (musician_id, band_id)
+      VALUES ($1, $2)
+    `,
+    [musicianId, bandId]
+  );
+}
+
 export default {
   getByName,
   create,
   getBandsFromQuery,
+  invite,
 };

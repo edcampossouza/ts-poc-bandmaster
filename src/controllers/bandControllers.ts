@@ -27,7 +27,21 @@ async function searchBands(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function invite(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { bandId, musicianId } = req.params;
+    const userID: Number = res.locals.user.id;
+    await bandServices.invite({ userID, bandId: Number(bandId), musicianId: Number(musicianId) });
+
+    return res.status(200).send("..");
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}
+
 export default {
   createBand,
   searchBands,
+  invite,
 };
