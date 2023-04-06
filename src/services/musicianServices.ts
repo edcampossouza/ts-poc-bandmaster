@@ -10,6 +10,7 @@ import dotenv from "dotenv";
 
 import musicianRepositories from "../repositories/musicianRepositories.js";
 import errors from "../errors/index.js";
+import { MusicianQuery } from "../protocols/Queries";
 
 dotenv.config();
 const { JWT_SECRET } = process.env;
@@ -41,8 +42,16 @@ async function getById(id: number): Promise<Musician | null> {
   return musician;
 }
 
+async function query(musicianQuery: MusicianQuery): Promise<Musician[]> {
+  const musicians: Musician[] =
+    await musicianRepositories.getMusiciansFromQuery(musicianQuery);
+
+  return musicians;
+}
+
 export default {
   signup,
   signin,
   getById,
+  query,
 };

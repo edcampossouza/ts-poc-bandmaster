@@ -136,7 +136,6 @@ async function executeBandQuery(clause: WhereClause): Promise<Band[]> {
 
 async function getBandsFromQuery(query: BandQuery): Promise<Band[]> {
   const clause: WhereClause = buildBandQuery(query);
-  console.log(clause);
   const results = await executeBandQuery(clause);
   return results;
 }

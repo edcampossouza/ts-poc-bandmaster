@@ -2,6 +2,8 @@ export type QueryCondition = {
   column: string;
   operator: string;
   variable: any;
+  inverted?: boolean;
+  tostring?: string;
 };
 
 export type WhereClause = {
@@ -16,7 +18,13 @@ export function buildWhereClause(conditions: QueryCondition[]): WhereClause {
   for (const condition of conditions) {
     index++;
     str += index === 1 ? "WHERE " : " AND ";
-    str += ` ${condition.column} ${condition.operator} $${index} `;
+    if (condition.tostring) {
+      str += condition.tostring.replace("__VAR__", `$${index}`);
+    } else {
+      str += condition.inverted
+        ? `( $${index}  ${condition.operator} ${condition.column} )`
+        : `( ${condition.column} ${condition.operator} $${index} )`;
+    }
     varArray.push(condition.variable);
   }
   return {

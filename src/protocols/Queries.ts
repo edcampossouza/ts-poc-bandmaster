@@ -7,6 +7,7 @@ export type BandQuery = {
 };
 
 export type MusicianQuery = {
+  id?: string | Number;
   name?: string;
-  skills?: string;
+  skill?: string;
 };

@@ -18,6 +18,11 @@ musicianRouter.post(
   validateBody(SigninSchema),
   musicianControllers.signin
 );
+musicianRouter.get(
+  "/query",
+  authMiddleware,
+  musicianControllers.query
+);
 
 
 musicianRouter.get(

@@ -3,6 +3,7 @@ import { MusicianCredentials, MusicianInput } from "../protocols/Musician.js";
 
 import musicianServices from "../services/musicianServices.js";
 import errors from "../errors/index.js";
+import { MusicianQuery } from "../protocols/Queries.js";
 
 async function signup(req: Request, res: Response, next: NextFunction) {
   const musician = req.body as MusicianInput;
@@ -38,8 +39,20 @@ async function getById(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function query(req: Request, res: Response, next: NextFunction) {
+  try {
+    const queryParams = req.query as MusicianQuery;
+    const results = await musicianServices.query(queryParams);
+    return res.status(200).send(results);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}
+
 export default {
   signup,
   signin,
   getById,
+  query,
 };
