@@ -2,6 +2,8 @@ import { Band, BandInput } from "../protocols/Band.js";
 import connectionDb from "../config/database.js";
 import { Musician } from "../protocols/Musician.js";
 import { BandQuery } from "../protocols/Queries.js";
+import { prisma } from "../config/database.js";
+
 import { QueryCondition, WhereClause, buildWhereClause } from "./util.js";
 
 async function getByName(name: string, { exact = false }): Promise<Band[]> {
@@ -135,6 +137,67 @@ async function executeBandQuery(clause: WhereClause): Promise<Band[]> {
   return bands;
 }
 
+async function findMany(query: BandQuery) {
+  const results = await prisma.band.findMany({
+    select: {
+      id: true,
+      name: true,
+      city: true,
+      style: true,
+      founder: {
+        select: {
+          id: true,
+          name: true,
+          dateOfBirth: true,
+          skills: {
+            select: {
+              skill: true,
+            },
+          },
+        },
+      },
+      members: {
+        select: {
+          musician: {
+            select: {
+              id: true,
+              name: true,
+              dateOfBirth: true,
+              skills: {
+                select: {
+                  skill: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    where: {
+      city: query.city
+        ? {
+            contains: query.city,
+            mode: "insensitive",
+          }
+        : undefined,
+      style: query.style
+        ? {
+            contains: query.style,
+            mode: "insensitive",
+          }
+        : undefined,
+      name: query.name
+        ? {
+            contains: query.name,
+            mode: "insensitive",
+          }
+        : undefined,
+      id: query.id ? { equals: Number(query.id) } : undefined,
+    },
+  });
+  return results;
+}
+
 async function getBandsFromQuery(query: BandQuery): Promise<Band[]> {
   const clause: WhereClause = buildBandQuery(query);
   const results = await executeBandQuery(clause);
@@ -156,4 +219,5 @@ export default {
   create,
   getBandsFromQuery,
   invite,
+  findMany,
 };

@@ -14,10 +14,12 @@ async function create(bandInput: BandInput, founderId: Number) {
   await bandRepositories.create(bandInput, founderId);
 }
 
-async function query(bandQuery: BandQuery): Promise<Band[]> {
-  const bands: Band[] = await bandRepositories.getBandsFromQuery(bandQuery);
+async function query(bandQuery: BandQuery){
+  // const bands: Band[] = await bandRepositories.getBandsFromQuery(bandQuery);
 
-  return bands;
+  // return bands;
+  const results = bandRepositories.findMany(bandQuery);
+  return results;
 }
 
 async function invite({ userID, bandId, musicianId }): Promise<void> {

@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model band {
+  id               Int             @id @default(autoincrement())
+  name             String          @unique
+  founder_id       Int
+  dateOfFoundation DateTime        @map("date_of_foundation") @db.Date
+  city             String
+  style            String
+  founder          musician        @relation(fields: [founder_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  members    musician_band[]
+}
+
+model musician {
+  id             Int              @id @default(autoincrement())
+  name           String
+  email          String
+  password       String
+  dateOfBirth    DateTime         @map("date_of_birth") @db.Date
+  band           band[]
+  musician_band  musician_band[]
+  skills musician_skill[]
+}
+
+model musician_band {
+  id          Int       @id @default(autoincrement())
+  musician_id Int
+  band_id     Int
+  invited_at  DateTime  @default(now()) @db.Timestamp(6)
+  accepted_at DateTime? @db.Timestamp(6)
+  band        band      @relation(fields: [band_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  musician    musician  @relation(fields: [musician_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([musician_id, band_id])
+}
+
+model musician_skill {
+  id          Int      @id @default(autoincrement())
+  musician_id Int
+  skill       String
+  musician    musician @relation(fields: [musician_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}

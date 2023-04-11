@@ -1,5 +1,9 @@
 import pg from "pg";
 import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
+
 dotenv.config();
 
 const { Pool } = pg;
@@ -9,3 +13,4 @@ const connectionDb = new Pool({
 });
 
 export default connectionDb;
+export { prisma };
